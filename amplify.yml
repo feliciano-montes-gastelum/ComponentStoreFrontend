@@ -1,0 +1,33 @@
+version: 1
+applications:
+  - appRoot: .
+    env:
+      variables:
+        NODE_ENV: production
+        NPM_CACHE_LOCATION: ~/.npm
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - npm ci
+            - npm run build
+        build:
+          commands:
+            - echo "Build complete"
+      artifacts:
+        baseDirectory: dist
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+      files:
+        - '**/*.html'
+        - '**/*.css'
+        - '**/*.js'
+        - '**/*.json'
+    backend:
+      phases:
+        build:
+          commands:
+            - echo "Backend build phase"

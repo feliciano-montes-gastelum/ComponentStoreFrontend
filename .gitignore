@@ -77,3 +77,15 @@ Thumbs.db
 /dist
 /build
 *.bundle.js
+
+# AWS Amplify
+amplify/\#current-cloud-backend
+amplify/.classpath.xml
+amplify/logs
+amplify/mock-data
+amplify/mock-aws-artifact-*.zip
+amplify/backend.lock
+amplify/team-provider-info.json
+.amplify
+.amplifyrc
+amplify-backup.json
