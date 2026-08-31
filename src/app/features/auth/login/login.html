@@ -1,0 +1,52 @@
+<div class="app-page app-container-narrow app-auth-page">
+  <h1>Sign in</h1>
+  <p class="app-auth-page__subtitle">Access your profile, component requests and purchase history.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (errorMessage()) {
+      <div class="app-auth-page__error" role="alert">{{ errorMessage() }}</div>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Username or email</mat-label>
+      <input matInput formControlName="usernameOrEmail" autocomplete="username" required />
+      @if (form.get('usernameOrEmail')?.invalid && form.get('usernameOrEmail')?.touched) {
+        <mat-error>{{ describeError('usernameOrEmail', 'Username or email') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        [type]="hidePassword() ? 'password' : 'text'"
+        formControlName="password"
+        autocomplete="current-password"
+        required
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="hidePassword.set(!hidePassword())"
+        [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+        [attr.aria-pressed]="!hidePassword()"
+      >
+        <mat-icon aria-hidden="true">{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+      </button>
+      @if (form.get('password')?.invalid && form.get('password')?.touched) {
+        <mat-error>{{ describeError('password', 'Password') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <button mat-flat-button type="submit" class="app-auth-page__submit" [disabled]="submitting()">
+      @if (submitting()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        Sign in
+      }
+    </button>
+  </form>
+
+  <p class="app-auth-page__switch">Don't have an account? <a routerLink="/register">Register</a></p>
+</div>

@@ -1,0 +1,88 @@
+<div class="app-page app-container-narrow">
+  <a routerLink="/my-requests" class="app-back-link">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Back to my requests
+  </a>
+
+  <h1>Request a new component</h1>
+  <p class="app-new-request__subtitle">
+    Use this form only for components we don't currently carry. If a component is already in our
+    catalog, add it to your bag instead — you'll see any matches below as you type.
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (errorMessage()) {
+      <div class="app-new-request__error" role="alert">{{ errorMessage() }}</div>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Component name</mat-label>
+      <input matInput formControlName="componentName" required />
+      @if (form.get('componentName')?.invalid && form.get('componentName')?.touched) {
+        <mat-error>{{ describeError('componentName', 'Component name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="app-form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Part number (if known)</mat-label>
+        <input matInput formControlName="partNumber" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Manufacturer (if known)</mat-label>
+        <input matInput formControlName="manufacturer" />
+      </mat-form-field>
+    </div>
+
+    @if (searching()) {
+      <p class="app-new-request__searching">
+        <mat-spinner diameter="16"></mat-spinner>
+        Checking our catalog for matching components…
+      </p>
+    } @else if (hasSearched() && matches().length > 0) {
+      <div class="app-new-request__matches" role="region" aria-label="Matching catalog components">
+        <p class="app-new-request__matches-title">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          We found {{ matches().length === 1 ? 'a component' : 'components' }} already in our catalog that might be
+          what you're looking for. Add it to your bag instead of requesting it.
+        </p>
+        <div class="app-new-request__matches-grid">
+          @for (item of matches(); track item.id) {
+            <app-product-card [component]="item"></app-product-card>
+          }
+        </div>
+        <mat-checkbox formControlName="confirmedNoMatch">
+          None of these matches what I'm looking for — submit a new-component request anyway.
+        </mat-checkbox>
+      </div>
+    } @else if (hasSearched()) {
+      <p class="app-new-request__no-matches">
+        <mat-icon aria-hidden="true">check_circle</mat-icon>
+        No matching components found in our catalog — you can request this as a new component.
+      </p>
+    }
+
+    <div class="app-new-request__quantity">
+      <label id="quantity-label">Requested quantity</label>
+      <app-quantity-input formControlName="quantity" [min]="1" label="Requested quantity"></app-quantity-input>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Reason / notes (optional)</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"
+        rows="3"
+        placeholder="Why do you need this component, and any other details"
+      ></textarea>
+    </mat-form-field>
+
+    <button mat-flat-button type="submit" class="app-new-request__submit" [disabled]="submitting()">
+      @if (submitting()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        Submit request
+      }
+    </button>
+  </form>
+</div>

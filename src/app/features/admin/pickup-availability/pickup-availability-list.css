@@ -1,0 +1,53 @@
+.app-pickup-availability__priority-note {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: var(--mat-sys-surface-container-high);
+  border-radius: var(--app-radius-md);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.app-pickup-availability__priority-note p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.app-pickup-availability__preview {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.app-pickup-availability__preview-controls {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.app-pickup-availability__preview-error {
+  color: var(--app-stock-out-fg);
+}
+
+.app-pickup-availability__preview-result {
+  background: var(--mat-sys-surface-container-high);
+  border-radius: var(--app-radius-md);
+  padding: 1rem;
+}
+
+.app-pickup-availability__slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+.app-pickup-availability__slots li {
+  background: var(--mat-sys-surface-container-highest);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.8rem;
+}

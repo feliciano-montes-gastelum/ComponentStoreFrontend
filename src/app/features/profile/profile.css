@@ -1,0 +1,107 @@
+.app-profile-card {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--app-radius-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.app-profile-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin: 0;
+}
+
+.app-profile-details dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mat-sys-on-surface-variant);
+  margin-bottom: 0.15rem;
+}
+
+.app-profile-details dd {
+  margin: 0;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.app-profile-qr {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--app-radius-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.app-profile-qr__text h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.app-profile-qr__text p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+  max-width: 40ch;
+  line-height: 1.5;
+}
+
+.app-profile-personal {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--app-radius-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.app-profile-personal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.app-profile-personal__header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.app-profile-form__error {
+  background: var(--app-stock-out-bg);
+  color: var(--app-stock-out-fg);
+  border-radius: var(--app-radius-sm);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.app-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 1rem;
+}
+
+@media (max-width: 560px) {
+  .app-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-form-grid mat-form-field {
+  width: 100%;
+}
+
+.app-profile-form__actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.app-profile-links {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}

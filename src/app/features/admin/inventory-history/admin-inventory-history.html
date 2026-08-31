@@ -1,0 +1,53 @@
+<div class="app-page">
+  <app-page-header title="Inventory history" description="A complete, read-only audit trail of inventory changes.">
+    @if (inventoryId()) {
+      <button mat-stroked-button type="button" (click)="clearFilter()">
+        <mat-icon aria-hidden="true">close</mat-icon>
+        Clear component filter
+      </button>
+    }
+  </app-page-header>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading history…"></app-loading-spinner>
+  } @else if (entries().length === 0) {
+    <app-empty-state icon="history" title="No history entries found"></app-empty-state>
+  } @else {
+    <div class="app-table-scroll">
+      <table mat-table [dataSource]="entries()">
+        <ng-container matColumnDef="createDate">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.createDate | date: 'medium' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="inventoryName">
+          <th mat-header-cell *matHeaderCellDef>Component</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.inventoryName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef>Action</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.action }}</td>
+        </ng-container>
+        <ng-container matColumnDef="change">
+          <th mat-header-cell *matHeaderCellDef>Quantity change</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.previousQuantity }} → {{ entry.newQuantity }} ({{ entry.quantityChange > 0 ? '+' : '' }}{{ entry.quantityChange }})</td>
+        </ng-container>
+        <ng-container matColumnDef="updateUser">
+          <th mat-header-cell *matHeaderCellDef>By</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.updateUser }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalElements()"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex()"
+      [hidePageSize]="true"
+      (page)="onPage($event)"
+      aria-label="Select page of inventory history"
+    >
+    </mat-paginator>
+  }
+</div>

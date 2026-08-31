@@ -1,0 +1,67 @@
+<div class="app-page">
+  <app-page-header
+    title="Users"
+    description="Registered accounts and their roles. Role changes take effect the next time the user signs in or their session refreshes."
+  >
+  </app-page-header>
+
+  <mat-form-field appearance="outline" class="app-users-search">
+    <mat-label>Search by username</mat-label>
+    <input matInput [formControl]="searchControl" />
+    <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+  </mat-form-field>
+
+  <div class="app-users-notice" role="note">
+    <mat-icon aria-hidden="true">info</mat-icon>
+    <p>
+      This roster is built from role assignments (there's no dedicated "all accounts" listing). Click a username
+      to see that account's full personal information.
+    </p>
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading users…"></app-loading-spinner>
+  } @else if (filteredRows().length === 0) {
+    <app-empty-state icon="group" title="No users found"></app-empty-state>
+  } @else {
+    <div class="app-table-scroll">
+      <table mat-table [dataSource]="filteredRows()">
+        <ng-container matColumnDef="username">
+          <th mat-header-cell *matHeaderCellDef>Username</th>
+          <td mat-cell *matCellDef="let row">
+            <a [routerLink]="['/admin/users', row.userAuthenticationId]">{{ row.username }}</a>
+            @if (isCurrentUser(row)) {
+              <span class="app-users-you-flag">(you)</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="roles">
+          <th mat-header-cell *matHeaderCellDef>Role</th>
+          <td mat-cell *matCellDef="let row">
+            <mat-chip-set>
+              @for (assignment of row.assignments; track assignment.id) {
+                <mat-chip>{{ assignment.roleName }}</mat-chip>
+              }
+            </mat-chip-set>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef><span class="app-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let row">
+            <button
+              mat-button
+              type="button"
+              [disabled]="isCurrentUser(row)"
+              [matTooltip]="isCurrentUser(row) ? 'You cannot change your own role.' : ''"
+              (click)="changeRole(row)"
+            >
+              Change role
+            </button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  }
+</div>

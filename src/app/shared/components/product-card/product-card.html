@@ -1,0 +1,40 @@
+<a class="app-product-card" [routerLink]="['/components', component().id]">
+  <mat-card appearance="outlined">
+    <div class="app-product-card__image">
+      <app-image-with-fallback [src]="component().imageUrl" [alt]="component().name"></app-image-with-fallback>
+      @if (!component().active) {
+        <span class="app-product-card__inactive-flag">Unavailable</span>
+      }
+    </div>
+    <mat-card-content>
+      <p class="app-product-card__type">{{ component().componentTypeName }}</p>
+      <h3 class="app-product-card__name">{{ component().name }}</h3>
+      @if (component().manufacturer || component().partNumber) {
+        <p class="app-product-card__meta">
+          {{ component().manufacturer }}
+          @if (component().manufacturer && component().partNumber) {
+            &middot;
+          }
+          {{ component().partNumber }}
+        </p>
+      }
+      <div class="app-product-card__footer">
+        <span class="app-product-card__price">{{ component().unitPrice | currency }}</span>
+        <app-stock-badge [quantity]="component().quantity"></app-stock-badge>
+      </div>
+      @if (auth.isAuthenticated()) {
+        <button
+          mat-stroked-button
+          type="button"
+          class="app-product-card__add-to-bag"
+          [disabled]="!canAddToBag || addingToBag()"
+          (click)="addToBag($event)"
+          [attr.aria-label]="'Add ' + component().name + ' to bag'"
+        >
+          <mat-icon aria-hidden="true">add_shopping_cart</mat-icon>
+          {{ addingToBag() ? 'Adding…' : 'Add to bag' }}
+        </button>
+      }
+    </mat-card-content>
+  </mat-card>
+</a>

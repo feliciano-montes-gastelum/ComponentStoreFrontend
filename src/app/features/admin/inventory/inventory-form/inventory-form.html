@@ -1,0 +1,143 @@
+<div class="app-page app-container-narrow">
+  <a routerLink="/admin/inventory" class="app-back-link">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Back to inventory
+  </a>
+
+  <h1>{{ isEditMode() ? 'Edit component' : 'New component' }}</h1>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading component…"></app-loading-spinner>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (errorMessage()) {
+        <div class="app-form-error" role="alert">{{ errorMessage() }}</div>
+      }
+
+      <mat-form-field appearance="outline">
+        <mat-label>Component type</mat-label>
+        <mat-select formControlName="componentTypeId" required>
+          @for (type of componentTypes(); track type.id) {
+            <mat-option [value]="type.id">{{ type.name }}</mat-option>
+          }
+        </mat-select>
+        @if (form.get('componentTypeId')?.invalid && form.get('componentTypeId')?.touched) {
+          <mat-error>{{ describeError('componentTypeId', 'Component type') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" required />
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <mat-error>{{ describeError('name', 'Name') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="app-form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Part number</mat-label>
+          <input matInput formControlName="partNumber" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Serial number</mat-label>
+          <input matInput formControlName="serialNumber" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Manufacturer</mat-label>
+          <input matInput formControlName="manufacturer" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Storage location</mat-label>
+          <input matInput formControlName="location" />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="3"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Image URL (optional)</mat-label>
+        <input matInput formControlName="imageUrl" />
+        <mat-hint>For richer image management with multiple photos, use "Manage images" after saving.</mat-hint>
+      </mat-form-field>
+
+      <mat-divider></mat-divider>
+
+      <div class="app-form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Unit price</mat-label>
+          <input matInput type="number" step="0.01" min="0" formControlName="unitPrice" required />
+          @if (form.get('unitPrice')?.invalid && form.get('unitPrice')?.touched) {
+            <mat-error>{{ describeError('unitPrice', 'Unit price') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Quantity</mat-label>
+          <input matInput type="number" step="1" min="0" formControlName="quantity" required />
+          @if (form.get('quantity')?.invalid && form.get('quantity')?.touched) {
+            <mat-error>{{ describeError('quantity', 'Quantity') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      @if (isEditMode()) {
+        <div class="app-quantity-adjust">
+          <p class="app-quantity-adjust__label">Quick stock adjustment</p>
+          <div class="app-quantity-adjust__controls">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="app-quantity-adjust__field">
+              <mat-label>+/- amount</mat-label>
+              <input
+                matInput
+                type="number"
+                step="1"
+                [ngModel]="quantityDelta()"
+                (ngModelChange)="quantityDelta.set($event)"
+                [ngModelOptions]="{ standalone: true }"
+              />
+            </mat-form-field>
+            <button mat-stroked-button type="button" (click)="applyQuantityDelta()">Apply to quantity above</button>
+          </div>
+          <p class="app-quantity-adjust__hint">
+            This updates the "Quantity" field above; save the form to record the change. New quantity will be
+            {{ projectedQuantity() }}.
+          </p>
+        </div>
+      }
+
+      <mat-slide-toggle formControlName="active">Active (visible in the public catalog)</mat-slide-toggle>
+
+      <div class="app-form-actions">
+        <button mat-flat-button type="submit" [disabled]="submitting()">
+          @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            {{ isEditMode() ? 'Save changes' : 'Create component' }}
+          }
+        </button>
+        @if (isEditMode()) {
+          <a mat-stroked-button [routerLink]="['/admin/inventory', id(), 'images']">Manage images</a>
+        }
+      </div>
+    </form>
+
+    @if (isEditMode() && history().length > 0) {
+      <section class="app-recent-history">
+        <h2>Recent inventory history</h2>
+        <ul>
+          @for (entry of history(); track entry.id) {
+            <li>
+              <span class="app-recent-history__action">{{ entry.action }}</span>
+              <span>{{ entry.previousQuantity }} → {{ entry.newQuantity }}</span>
+              <span class="app-recent-history__date">{{ entry.createDate | date: 'medium' }}</span>
+            </li>
+          }
+        </ul>
+        <a routerLink="/admin/inventory-history" [queryParams]="{ inventoryId: id() }">View full history</a>
+      </section>
+    }
+  }
+</div>

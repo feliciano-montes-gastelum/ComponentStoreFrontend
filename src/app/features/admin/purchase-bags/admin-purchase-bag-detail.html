@@ -1,0 +1,265 @@
+<div class="app-page app-container-narrow">
+  <a routerLink="/admin/purchase-bags" class="app-back-link">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Back to purchase bags
+  </a>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading purchase bag…"></app-loading-spinner>
+  } @else if (loadError() || !bag()) {
+    <app-empty-state icon="error_outline" title="Purchase bag not found"></app-empty-state>
+  } @else if (bag(); as currentBag) {
+    <app-page-header [title]="'Bag for ' + currentBag.username">
+      <app-bag-status-chip [status]="currentBag.status"></app-bag-status-chip>
+    </app-page-header>
+
+    <dl class="app-bag-detail__meta">
+      <div>
+        <dt>Customer username</dt>
+        <dd>{{ currentBag.username }}</dd>
+      </div>
+      <div>
+        <dt>Created</dt>
+        <dd>{{ currentBag.createdAt | date: 'medium' }}</dd>
+      </div>
+      @if (currentBag.closedAt) {
+        <div>
+          <dt>Closed</dt>
+          <dd>{{ currentBag.closedAt | date: 'medium' }} by {{ currentBag.closedBy }}</dd>
+        </div>
+      }
+    </dl>
+
+    @if (customer(); as person) {
+      <dl class="app-bag-detail__meta">
+        <div>
+          <dt>Name</dt>
+          <dd>{{ person.firstName }} {{ person.middleName }} {{ person.lastName }} {{ person.secondLastName }}</dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd>{{ person.email }}</dd>
+        </div>
+        @if (person.contactNumber) {
+          <div>
+            <dt>Contact number</dt>
+            <dd>{{ person.contactNumber }}</dd>
+          </div>
+        }
+        @if (person.addressLine1 || person.city || person.country) {
+          <div>
+            <dt>Address</dt>
+            <dd>
+              @if (person.addressLine1) {
+                {{ person.addressLine1 }}<br />
+              }
+              {{ person.city }}{{ person.city && person.stateProvince ? ', ' : '' }}{{ person.stateProvince }}
+              {{ person.postalCode }}<br />
+              {{ person.country }}
+            </dd>
+          </div>
+        }
+      </dl>
+    } @else if (customerLoadFailed()) {
+      <div class="app-bag-detail__notice" role="note">
+        <mat-icon aria-hidden="true">error_outline</mat-icon>
+        <p>Unable to load this customer's personal information right now.</p>
+      </div>
+    }
+
+    <p class="app-bag-detail__sale-hint">
+      Choose which items (and how many of each) to sell now. Anything left unchecked, or a smaller quantity than
+      what's in the bag, stays in the bag for another visit.
+    </p>
+
+    <ul class="app-bag-detail__items">
+      @for (item of currentBag.items; track item.id) {
+        <li class="app-bag-detail__item">
+          <div class="app-bag-detail__item-image">
+            <app-image-with-fallback [src]="imageUrls()[item.inventoryId]" [alt]="item.inventoryName"></app-image-with-fallback>
+          </div>
+          <div class="app-bag-detail__item-info">
+            <p class="app-bag-detail__item-name">{{ item.inventoryName }}</p>
+            @if (item.partNumber) {
+              <p class="app-bag-detail__item-meta">Part #: {{ item.partNumber }}</p>
+            }
+            <p class="app-bag-detail__item-meta">Available stock: {{ item.availableQuantity }}</p>
+            <p class="app-bag-detail__item-meta">In bag: {{ item.quantity }} × {{ item.unitPrice | currency }} = {{ item.subtotal | currency }}</p>
+          </div>
+          <div class="app-bag-detail__item-sale">
+            <div class="app-bag-detail__item-quantity">
+              <span class="app-bag-detail__item-quantity-label">Quantity in bag</span>
+              <app-quantity-input
+                [ngModel]="item.quantity"
+                (ngModelChange)="updateBagQuantity(item, $event)"
+                [min]="1"
+                [max]="99"
+                [label]="'Quantity of ' + item.inventoryName + ' in bag'"
+                [attr.aria-disabled]="busyItemId() === item.id || currentBag.status !== 'OPEN'"
+              ></app-quantity-input>
+            </div>
+            @if (maxSellable(item) > 0) {
+              <mat-checkbox
+                [checked]="saleSelections()[item.id]?.selected ?? false"
+                (change)="toggleSelected(item, $event)"
+              >
+                Sell
+              </mat-checkbox>
+              <app-quantity-input
+                [ngModel]="saleSelections()[item.id]?.quantity ?? 1"
+                (ngModelChange)="updateSaleQuantity(item, $event)"
+                [min]="1"
+                [max]="maxSellable(item)"
+                [label]="'Quantity of ' + item.inventoryName + ' to sell'"
+                [attr.aria-disabled]="!(saleSelections()[item.id]?.selected ?? false)"
+              ></app-quantity-input>
+            } @else {
+              <span class="app-bag-detail__out-of-stock">
+                <mat-icon aria-hidden="true">warning</mat-icon>
+                Out of stock — will remain in bag
+              </span>
+            }
+          </div>
+          <button
+            mat-icon-button
+            type="button"
+            color="warn"
+            [disabled]="busyItemId() === item.id"
+            (click)="removeItem(item)"
+            [attr.aria-label]="'Remove ' + item.inventoryName + ' from bag'"
+            matTooltip="Remove from bag"
+          >
+            <mat-icon aria-hidden="true">delete</mat-icon>
+          </button>
+        </li>
+      }
+    </ul>
+
+    <div class="app-bag-detail__total">
+      <span>Bag total</span>
+      <span class="app-bag-detail__total-value">{{ currentBag.totalPrice | currency }}</span>
+    </div>
+
+    <section class="app-pickup" aria-labelledby="admin-pickup-heading">
+      <h2 id="admin-pickup-heading">Pickup</h2>
+      <p class="app-pickup__status">
+        Pickup status: <app-pickup-status-chip [status]="currentBag.pickupStatus"></app-pickup-status-chip>
+      </p>
+      @if (currentBag.requestedPickupAt) {
+        <p class="app-pickup__requested">Requested for {{ currentBag.requestedPickupAt | date: 'medium' }}</p>
+      }
+      @if (currentBag.confirmedPickupAt) {
+        <p class="app-pickup__requested">Confirmed for {{ currentBag.confirmedPickupAt | date: 'medium' }}</p>
+      }
+      @if (currentBag.pickupNotes) {
+        <p class="app-pickup__requested">Customer notes: "{{ currentBag.pickupNotes }}"</p>
+      }
+
+      @if (currentBag.status !== 'OPEN') {
+        <div class="app-pickup__notice" role="note">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          <p>This bag is no longer open, so its pickup can't be changed anymore.</p>
+        </div>
+      } @else {
+        <div class="app-pickup__change">
+          <h3>Choose a new pickup date &amp; time</h3>
+          <div class="app-pickup__datetime">
+            <mat-form-field appearance="outline">
+              <mat-label>Pickup date</mat-label>
+              <input matInput [matDatepicker]="adminDatepicker" [min]="minPickupDate" [formControl]="pickupDateControl" />
+              <mat-datepicker-toggle matIconSuffix [for]="adminDatepicker"></mat-datepicker-toggle>
+              <mat-datepicker #adminDatepicker></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Pickup time</mat-label>
+              <mat-select [formControl]="pickupTimeControl">
+                @for (slot of availableSlots(); track slot.value) {
+                  <mat-option [value]="slot.value">{{ slot.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          @if (checkingAvailability()) {
+            <p class="app-pickup__requested">Checking availability…</p>
+          } @else if (availabilityCheckFailed()) {
+            <p class="app-pickup__requested" role="alert">Unable to check pickup availability for that date.</p>
+          } @else if (dateAvailability(); as availability) {
+            @if (availability.available) {
+              <p class="app-pickup__requested">
+                Times shown are in {{ availability.timezone }}, based on {{ describeAppliedScope(availability.appliedScope) }}.
+              </p>
+            } @else {
+              <p class="app-pickup__requested" role="alert">
+                This date is closed for pickup ({{ describeAppliedScope(availability.appliedScope) }}).
+              </p>
+            }
+          }
+
+          <div class="app-pickup__actions">
+            <button
+              mat-flat-button
+              type="button"
+              [disabled]="!canChangePickup()"
+              [matTooltip]="!pickupDateControl.value || !pickupTimeControl.value ? 'Choose a date and time first' : ''"
+              (click)="confirmPickup()"
+            >
+              Confirm pickup time
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              [disabled]="updatingPickup() || currentBag.pickupStatus === 'NOT_REQUESTED'"
+              (click)="rejectPickup()"
+            >
+              Reject pickup
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              [disabled]="updatingPickup() || currentBag.pickupStatus !== 'CONFIRMED'"
+              (click)="markReadyForPickup()"
+            >
+              Mark ready for pickup
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              color="warn"
+              [disabled]="updatingPickup() || currentBag.pickupStatus === 'NOT_REQUESTED'"
+              (click)="cancelPickup()"
+            >
+              Cancel pickup
+            </button>
+          </div>
+        </div>
+      }
+    </section>
+
+    <div class="app-bag-detail__close">
+      <button
+        mat-flat-button
+        color="warn"
+        type="button"
+        [disabled]="!canSell() || selling()"
+        [matTooltip]="
+          currentBag.status !== 'OPEN'
+            ? 'This bag is not open'
+            : currentBag.items.length === 0
+              ? 'This bag is empty'
+              : !canSell()
+                ? 'Select at least one item to sell'
+                : ''
+        "
+        (click)="performSale()"
+      >
+        <mat-icon aria-hidden="true">point_of_sale</mat-icon>
+        {{ selling() ? 'Selling…' : 'Perform sale' }}
+      </button>
+      <p class="app-bag-detail__close-hint">
+        Sells only the checked items (at the quantities shown). Inventory and sales history are only touched for
+        what's sold; anything left over stays in the bag. This cannot be undone.
+      </p>
+    </div>
+  }
+</div>

@@ -1,0 +1,9 @@
+.app-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--app-radius-md);
+}
+
+.app-history-table {
+  width: 100%;
+}

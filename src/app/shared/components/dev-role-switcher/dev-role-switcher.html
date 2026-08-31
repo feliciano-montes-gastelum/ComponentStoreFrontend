@@ -1,0 +1,20 @@
+@if (isEnabled) {
+  <div class="app-dev-switcher" role="group" aria-label="Development role switcher">
+    <span class="app-dev-switcher__label">
+      <mat-icon aria-hidden="true">bug_report</mat-icon>
+      DEV — viewing as
+    </span>
+    <mat-button-toggle-group
+      [value]="currentOption()"
+      (change)="onChange($event)"
+      aria-label="Choose a role to preview"
+    >
+      <mat-button-toggle value="ANONYMOUS">Not logged in</mat-button-toggle>
+      <mat-button-toggle value="ROLE_GUEST">Guest</mat-button-toggle>
+      <mat-button-toggle value="ROLE_ADMINISTRATOR">Administrator</mat-button-toggle>
+    </mat-button-toggle-group>
+    @if (auth.isDevSession()) {
+      <span class="app-dev-switcher__hint">Fabricated session — no real backend login was performed.</span>
+    }
+  </div>
+}

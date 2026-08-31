@@ -1,0 +1,58 @@
+<div class="app-page">
+  <app-page-header title="Component catalog" description="Browse available electronic components, prices and availability.">
+  </app-page-header>
+
+  <div class="app-catalog-filters">
+    <mat-form-field appearance="outline" class="app-catalog-filters__search">
+      <mat-label>Search components</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Name, part number or manufacturer" />
+      <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="app-catalog-filters__type">
+      <mat-label>Component type</mat-label>
+      <mat-select [formControl]="componentTypeControl">
+        <mat-option value="">All types</mat-option>
+        @for (type of componentTypes(); track type.id) {
+          <mat-option [value]="type.id">{{ type.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (searchControl.value || componentTypeControl.value) {
+      <button mat-button type="button" (click)="clearFilters()">
+        <mat-icon aria-hidden="true">close</mat-icon>
+        Clear filters
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading components…"></app-loading-spinner>
+  } @else if (errorMessage()) {
+    <app-empty-state icon="error_outline" title="Something went wrong" [description]="errorMessage() ?? undefined">
+    </app-empty-state>
+  } @else if (results().length === 0) {
+    <app-empty-state
+      icon="search_off"
+      title="No components found"
+      description="Try a different search term or clear your filters."
+    ></app-empty-state>
+  } @else {
+    <div class="app-catalog-grid">
+      @for (item of results(); track item.id) {
+        <app-product-card [component]="item"></app-product-card>
+      }
+    </div>
+
+    <mat-paginator
+      [length]="totalElements()"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex()"
+      [hidePageSize]="true"
+      (page)="onPage($event)"
+      aria-label="Select page of components"
+    >
+    </mat-paginator>
+  }
+</div>

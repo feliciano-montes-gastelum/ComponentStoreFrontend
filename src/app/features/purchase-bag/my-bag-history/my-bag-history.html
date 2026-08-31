@@ -1,0 +1,53 @@
+<div class="app-page">
+  <a routerLink="/my-bag" class="app-back-link">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Back to my bag
+  </a>
+
+  <app-page-header title="My bag history" description="Your open and past purchase bags."></app-page-header>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading your bags…"></app-loading-spinner>
+  } @else if (bags().length === 0) {
+    <app-empty-state icon="shopping_bag" title="No bags yet" description="Add components to your bag to see them here."></app-empty-state>
+  } @else {
+    <mat-accordion>
+      @for (bag of bags(); track bag.id) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ bag.createdAt | date: 'medium' }}</mat-panel-title>
+            <mat-panel-description class="app-bag-history__description">
+              <app-bag-status-chip [status]="bag.status"></app-bag-status-chip>
+              {{ bag.totalPrice | currency }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <ul class="app-bag-history__items">
+            @for (item of bag.items; track item.id) {
+              <li>
+                {{ item.inventoryName }}
+                @if (item.partNumber) {
+                  <span class="app-bag-history__subtext">({{ item.partNumber }})</span>
+                }
+                — {{ item.quantity }} × {{ item.unitPrice | currency }} = {{ item.subtotal | currency }}
+              </li>
+            }
+          </ul>
+          @if (bag.closedAt) {
+            <p class="app-bag-history__closed">Closed {{ bag.closedAt | date: 'medium' }} by {{ bag.closedBy }}</p>
+          }
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+
+    <mat-paginator
+      [length]="totalElements()"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex()"
+      [hidePageSize]="true"
+      (page)="onPage($event)"
+      aria-label="Select page of bag history"
+    >
+    </mat-paginator>
+  }
+</div>

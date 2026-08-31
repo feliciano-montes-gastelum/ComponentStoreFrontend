@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>{{ isEditMode ? 'Edit component type' : 'New component type' }}</h2>
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <mat-dialog-content class="app-component-type-form">
+    @if (errorMessage()) {
+      <div class="app-form-error" role="alert">{{ errorMessage() }}</div>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Code</mat-label>
+      <input matInput formControlName="code" required />
+      @if (form.get('code')?.invalid && form.get('code')?.touched) {
+        <mat-error>{{ describeError('code', 'Code') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" required />
+      @if (form.get('name')?.invalid && form.get('name')?.touched) {
+        <mat-error>{{ describeError('name', 'Name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+
+    <mat-slide-toggle formControlName="active">Active</mat-slide-toggle>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancel</button>
+    <button mat-flat-button type="submit" [disabled]="submitting()">
+      @if (submitting()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        Save
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

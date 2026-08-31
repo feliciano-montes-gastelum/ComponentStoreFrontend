@@ -1,0 +1,92 @@
+<div class="app-page">
+  <app-page-header
+    title="Component requests"
+    description="New-component requests and pickup holds submitted by users."
+  ></app-page-header>
+
+  <div class="app-admin-requests-notice" role="note">
+    The backend only supports creating and cancelling requests — there is no endpoint to approve, mark ready for
+    pickup, complete, or reject a request, even though those statuses exist. See the README for details.
+  </div>
+
+  <mat-form-field appearance="outline" class="app-status-filter">
+    <mat-label>Status</mat-label>
+    <mat-select [formControl]="statusControl">
+      <mat-option value="ALL">All</mat-option>
+      <mat-option value="PENDING">Pending</mat-option>
+      <mat-option value="APPROVED">Approved</mat-option>
+      <mat-option value="READY_FOR_PICKUP">Ready for pickup</mat-option>
+      <mat-option value="COMPLETED">Completed</mat-option>
+      <mat-option value="REJECTED">Rejected</mat-option>
+      <mat-option value="EXPIRED">Expired</mat-option>
+      <mat-option value="CANCELLED">Cancelled</mat-option>
+    </mat-select>
+  </mat-form-field>
+  @if (statusControl.value !== 'ALL') {
+    <p class="app-status-filter__hint">
+      Filtering applies to the current page only (the backend doesn't support filtering by status server-side).
+    </p>
+  }
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading requests…"></app-loading-spinner>
+  } @else if (requests().length === 0) {
+    <app-empty-state icon="assignment" title="No requests found"></app-empty-state>
+  } @else {
+    <div class="app-table-scroll">
+      <table mat-table [dataSource]="requests()">
+        <ng-container matColumnDef="componentName">
+          <th mat-header-cell *matHeaderCellDef>Component</th>
+          <td mat-cell *matCellDef="let request">
+            {{ request.componentName }}
+            @if (request.partNumber) {
+              <span class="app-admin-requests__subtext">{{ request.partNumber }}</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="requester">
+          <th mat-header-cell *matHeaderCellDef>Requested by</th>
+          <td mat-cell *matCellDef="let request">{{ request.username }}</td>
+        </ng-container>
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let request">{{ request.requestType === 'HOLD_EXISTING' ? 'Pickup hold' : 'New component' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef>Qty</th>
+          <td mat-cell *matCellDef="let request">{{ request.quantity }}</td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let request"><app-request-status-chip [status]="request.status"></app-request-status-chip></td>
+        </ng-container>
+        <ng-container matColumnDef="pickup">
+          <th mat-header-cell *matHeaderCellDef>Pickup by</th>
+          <td mat-cell *matCellDef="let request">{{ request.pickupExpiresAt ? (request.pickupExpiresAt | date: 'short') : '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef><span class="app-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let request">
+            @if (request.status === 'PENDING') {
+              <button mat-button color="warn" type="button" [disabled]="cancellingId() === request.id" (click)="cancel(request)">
+                Cancel
+              </button>
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalElements()"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex()"
+      [hidePageSize]="true"
+      (page)="onPage($event)"
+      aria-label="Select page of requests"
+    >
+    </mat-paginator>
+  }
+</div>

@@ -1,0 +1,199 @@
+<div class="app-page app-container-narrow">
+  <app-page-header title="My profile"></app-page-header>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading your profile…"></app-loading-spinner>
+  } @else if (loadError()) {
+    <app-empty-state
+      icon="error_outline"
+      title="Unable to load your profile"
+      description="Please try again in a moment."
+    ></app-empty-state>
+  } @else if (currentUser(); as user) {
+    <div class="app-profile-card">
+      <dl class="app-profile-details">
+        <div>
+          <dt>Username</dt>
+          <dd>{{ user.username }}</dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd>{{ user.email }}</dd>
+        </div>
+        <div>
+          <dt>Role</dt>
+          <dd>
+            <mat-chip-set>
+              @for (role of user.roles; track role) {
+                <mat-chip>{{ role === 'ROLE_ADMINISTRATOR' ? 'Administrator' : 'Guest' }}</mat-chip>
+              }
+            </mat-chip-set>
+          </dd>
+        </div>
+        <div>
+          <dt>Last sign-in</dt>
+          <dd>{{ user.lastLoginAt ? (user.lastLoginAt | date: 'medium') : 'This is your first sign-in' }}</dd>
+        </div>
+        @if (auth.session(); as session) {
+          <div>
+            <dt>Session expires</dt>
+            <dd>{{ session.expiresAt | date: 'medium' }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+
+    <div class="app-profile-qr">
+      <app-qr-code [value]="bagQrValue()" [size]="160" ariaLabel="QR code linking to your bag"></app-qr-code>
+      <div class="app-profile-qr__text">
+        <h2>Pickup QR code</h2>
+        <p>
+          Show this to a store administrator at pickup — scanning it takes them straight to your current bag, so
+          they don't need to search for your account.
+        </p>
+      </div>
+    </div>
+
+    <div class="app-profile-personal">
+      <div class="app-profile-personal__header">
+        <h2>Personal information</h2>
+        @if (!editing()) {
+          <button mat-stroked-button type="button" (click)="startEditing()">
+            <mat-icon aria-hidden="true">edit</mat-icon>
+            Edit
+          </button>
+        }
+      </div>
+
+      @if (!editing()) {
+        <dl class="app-profile-details">
+          <div>
+            <dt>First name</dt>
+            <dd>{{ user.firstName }}</dd>
+          </div>
+          @if (user.middleName) {
+            <div>
+              <dt>Middle name</dt>
+              <dd>{{ user.middleName }}</dd>
+            </div>
+          }
+          <div>
+            <dt>Last name</dt>
+            <dd>{{ user.lastName }}</dd>
+          </div>
+          @if (user.secondLastName) {
+            <div>
+              <dt>Second last name</dt>
+              <dd>{{ user.secondLastName }}</dd>
+            </div>
+          }
+          <div>
+            <dt>Contact number</dt>
+            <dd>{{ user.contactNumber || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Address</dt>
+            <dd>
+              @if (user.addressLine1 || user.city || user.country) {
+                @if (user.addressLine1) {
+                  {{ user.addressLine1 }}<br />
+                }
+                @if (user.addressLine2) {
+                  {{ user.addressLine2 }}<br />
+                }
+                @if (user.city || user.stateProvince || user.postalCode) {
+                  {{ user.city }}{{ user.city && user.stateProvince ? ', ' : '' }}{{ user.stateProvince }}
+                  {{ user.postalCode }}<br />
+                }
+                {{ user.country }}
+              } @else {
+                —
+              }
+            </dd>
+          </div>
+        </dl>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          @if (saveError()) {
+            <div class="app-profile-form__error" role="alert">{{ saveError() }}</div>
+          }
+
+          <div class="app-form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>First name</mat-label>
+              <input matInput formControlName="firstName" required />
+              @if (form.get('firstName')?.invalid && form.get('firstName')?.touched) {
+                <mat-error>{{ describeError('firstName', 'First name') }}</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Middle name</mat-label>
+              <input matInput formControlName="middleName" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Last name</mat-label>
+              <input matInput formControlName="lastName" required />
+              @if (form.get('lastName')?.invalid && form.get('lastName')?.touched) {
+                <mat-error>{{ describeError('lastName', 'Last name') }}</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Second last name</mat-label>
+              <input matInput formControlName="secondLastName" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Contact number</mat-label>
+              <input matInput formControlName="contactNumber" autocomplete="tel" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Address line 1</mat-label>
+              <input matInput formControlName="addressLine1" autocomplete="address-line1" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Address line 2</mat-label>
+              <input matInput formControlName="addressLine2" autocomplete="address-line2" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city" autocomplete="address-level2" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>State / Province</mat-label>
+              <input matInput formControlName="stateProvince" autocomplete="address-level1" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Postal code</mat-label>
+              <input matInput formControlName="postalCode" autocomplete="postal-code" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Country</mat-label>
+              <input matInput formControlName="country" autocomplete="country-name" />
+            </mat-form-field>
+          </div>
+
+          <div class="app-profile-form__actions">
+            <button mat-flat-button type="submit" [disabled]="saving()">
+              @if (saving()) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                Save changes
+              }
+            </button>
+            <button mat-button type="button" (click)="cancelEditing()" [disabled]="saving()">Cancel</button>
+          </div>
+        </form>
+      }
+    </div>
+  }
+
+  <div class="app-profile-links">
+    <a mat-stroked-button routerLink="/my-requests">
+      <mat-icon aria-hidden="true">assignment</mat-icon>
+      My component requests
+    </a>
+    <a mat-stroked-button routerLink="/my-history">
+      <mat-icon aria-hidden="true">history</mat-icon>
+      My purchase history
+    </a>
+  </div>
+</div>

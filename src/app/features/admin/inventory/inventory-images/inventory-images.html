@@ -1,0 +1,88 @@
+<div class="app-page">
+  <a [routerLink]="['/admin/inventory', id(), 'edit']" class="app-back-link">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Back to {{ componentName() || 'component' }}
+  </a>
+
+  <h1>Manage images{{ componentName() ? ' — ' + componentName() : '' }}</h1>
+  <p class="app-images-subtitle">
+    Upload multiple photos, choose a primary image, and set the display order shown in the catalog gallery.
+  </p>
+
+  <input
+    #fileInput
+    type="file"
+    accept="image/jpeg,image/png,image/webp,image/gif"
+    class="app-visually-hidden"
+    (change)="onFileSelected($event)"
+  />
+
+  <div class="app-upload-panel">
+    <button mat-flat-button type="button" (click)="triggerFilePicker()" [disabled]="!!pendingUpload()">
+      <mat-icon aria-hidden="true">upload</mat-icon>
+      Upload image
+    </button>
+    @if (uploadError()) {
+      <p class="app-upload-panel__error" role="alert">{{ uploadError() }}</p>
+    }
+    @if (pendingUpload(); as pending) {
+      <div class="app-upload-preview">
+        <app-image-with-fallback [src]="pending.previewUrl" alt="Upload preview"></app-image-with-fallback>
+        <mat-progress-bar mode="determinate" [value]="pending.progress"></mat-progress-bar>
+        <span>{{ pending.progress }}%</span>
+      </div>
+    }
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading images…"></app-loading-spinner>
+  } @else if (images().length === 0) {
+    <app-empty-state icon="photo_library" title="No images yet" description="Upload a photo to show it in the catalog."></app-empty-state>
+  } @else {
+    <ul class="app-image-grid">
+      @for (image of images(); track image.id) {
+        <li class="app-image-card">
+          <div class="app-image-card__preview">
+            <app-image-with-fallback [src]="image.thumbnailUrl || image.url" [alt]="'Component image'"></app-image-with-fallback>
+            @if (image.isPrimary) {
+              <span class="app-image-card__primary-flag">Primary</span>
+            }
+          </div>
+          <div class="app-image-card__controls">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="app-image-card__order">
+              <mat-label>Order</mat-label>
+              <input
+                matInput
+                type="number"
+                [ngModel]="image.displayOrder"
+                (change)="updateDisplayOrder(image, $any($event.target).value)"
+                [disabled]="busyImageId() === image.id"
+              />
+            </mat-form-field>
+            <button
+              mat-icon-button
+              type="button"
+              [disabled]="image.isPrimary || busyImageId() === image.id"
+              (click)="setPrimary(image)"
+              matTooltip="Set as primary image"
+              [attr.aria-label]="'Set as primary image'"
+            >
+              <mat-icon aria-hidden="true">{{ image.isPrimary ? 'star' : 'star_outline' }}</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              color="warn"
+              [disabled]="busyImageId() === image.id"
+              (click)="remove(image)"
+              matTooltip="Remove image"
+              aria-label="Remove image"
+            >
+              <mat-icon aria-hidden="true">delete</mat-icon>
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -1,0 +1,21 @@
+.app-bag-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.app-bag-filters__field {
+  flex: 1 1 200px;
+  max-width: 280px;
+}
+
+.app-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--app-radius-md);
+}
+
+table {
+  width: 100%;
+}

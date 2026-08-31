@@ -1,0 +1,88 @@
+<div class="app-page">
+  <a routerLink="/" fragment="catalog" class="app-back-link">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Back to catalog
+  </a>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading component…"></app-loading-spinner>
+  } @else if (notFound() || !component()) {
+    <app-empty-state
+      icon="search_off"
+      title="Component not found"
+      description="It may have been removed or deactivated."
+    >
+      <a mat-flat-button routerLink="/" fragment="catalog">Back to catalog</a>
+    </app-empty-state>
+  } @else {
+    <div class="app-detail">
+      <div class="app-detail__gallery">
+        <div class="app-detail__main-image">
+          <app-image-with-fallback [src]="selectedImage()?.url" [alt]="selectedImage()?.alt"></app-image-with-fallback>
+        </div>
+        @if (galleryImages().length > 1) {
+          <div class="app-detail__thumbnails" role="tablist" aria-label="Component images">
+            @for (image of galleryImages(); track $index) {
+              <button
+                type="button"
+                role="tab"
+                class="app-detail__thumbnail"
+                [class.app-detail__thumbnail--active]="$index === selectedImageIndex()"
+                [attr.aria-selected]="$index === selectedImageIndex()"
+                (click)="selectImage($index)"
+              >
+                <app-image-with-fallback [src]="image.url" [alt]="image.alt"></app-image-with-fallback>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="app-detail__info">
+        <p class="app-detail__type">{{ component()!.componentTypeName }}</p>
+        <h1>{{ component()!.name }}</h1>
+        @if (component()!.manufacturer || component()!.partNumber) {
+          <p class="app-detail__meta">
+            @if (component()!.manufacturer) {
+              <span>Manufacturer: {{ component()!.manufacturer }}</span>
+            }
+            @if (component()!.partNumber) {
+              <span>Part #: {{ component()!.partNumber }}</span>
+            }
+          </p>
+        }
+
+        <div class="app-detail__price-row">
+          <span class="app-detail__price">{{ component()!.unitPrice | currency }}</span>
+          <app-stock-badge [quantity]="component()!.quantity"></app-stock-badge>
+        </div>
+
+        @if (component()!.description) {
+          <p class="app-detail__description">{{ component()!.description }}</p>
+        }
+
+        @if (component()!.active && auth.isAuthenticated()) {
+          <div class="app-detail__bag-row">
+            <app-quantity-input
+              [(ngModel)]="bagQuantity"
+              [min]="1"
+              [max]="99"
+              label="Quantity to add to bag"
+            ></app-quantity-input>
+            <button mat-flat-button type="button" [disabled]="addingToBag()" (click)="addToBag()">
+              <mat-icon aria-hidden="true">add_shopping_cart</mat-icon>
+              {{ addingToBag() ? 'Adding…' : 'Add to bag' }}
+            </button>
+          </div>
+        }
+
+        <div class="app-detail__actions">
+          <a mat-stroked-button [routerLink]="['/my-requests/new']" [queryParams]="{ componentName: component()!.name }">
+            <mat-icon aria-hidden="true">add_circle_outline</mat-icon>
+            Don't see what you need? Request a new component
+          </a>
+        </div>
+      </div>
+    </div>
+  }
+</div>

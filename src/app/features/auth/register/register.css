@@ -1,0 +1,50 @@
+.app-auth-page {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  max-width: 760px;
+}
+
+.app-auth-page__subtitle {
+  color: var(--mat-sys-on-surface-variant);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.app-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 1rem;
+}
+
+@media (max-width: 640px) {
+  .app-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.app-auth-page__optional {
+  margin: 0.5rem 0 1.25rem;
+}
+
+.app-auth-page__submit {
+  margin-top: 0.5rem;
+  height: 2.75rem;
+}
+
+.app-auth-page__error {
+  background: var(--app-stock-out-bg);
+  color: var(--app-stock-out-fg);
+  border-radius: var(--app-radius-sm);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.app-auth-page__switch {
+  margin-top: 1.5rem;
+  color: var(--mat-sys-on-surface-variant);
+}

@@ -1,0 +1,62 @@
+<div class="app-page">
+  <app-page-header title="My component requests" description="Requests you've submitted for components not currently in our catalog.">
+    <a mat-flat-button routerLink="/my-requests/new">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      New request
+    </a>
+  </app-page-header>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading your requests…"></app-loading-spinner>
+  } @else if (requests().length === 0) {
+    <app-empty-state
+      icon="assignment"
+      title="No requests yet"
+      description="Request a component we don't currently carry. Looking for something already in our catalog? Add it to your bag instead."
+    >
+      <a mat-flat-button routerLink="/my-requests/new">New request</a>
+    </app-empty-state>
+  } @else {
+    <ul class="app-request-list">
+      @for (request of requests(); track request.id) {
+        <li class="app-request-card">
+          <div class="app-request-card__main">
+            <p class="app-request-card__type">
+              {{ request.requestType === 'HOLD_EXISTING' ? 'Pickup hold' : 'New component request' }}
+            </p>
+            <h2>{{ request.componentName }}</h2>
+            <p class="app-request-card__meta">
+              Quantity: {{ request.quantity }}
+              @if (request.partNumber) {
+                &middot; Part #: {{ request.partNumber }}
+              }
+              @if (request.manufacturer) {
+                &middot; {{ request.manufacturer }}
+              }
+            </p>
+            @if (request.pickupExpiresAt) {
+              <p class="app-request-card__meta">Pickup by: {{ request.pickupExpiresAt | date: 'medium' }}</p>
+            }
+            @if (request.notes) {
+              <p class="app-request-card__notes">"{{ request.notes }}"</p>
+            }
+          </div>
+          <div class="app-request-card__side">
+            <app-request-status-chip [status]="request.status"></app-request-status-chip>
+            @if (request.status === 'PENDING') {
+              <button
+                mat-button
+                color="warn"
+                type="button"
+                [disabled]="cancellingId() === request.id"
+                (click)="cancel(request)"
+              >
+                Cancel
+              </button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

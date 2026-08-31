@@ -1,0 +1,76 @@
+<div class="app-page">
+  <app-page-header title="Purchase bags" description="All customer purchase bags — open, closed, and cancelled."></app-page-header>
+
+  <div class="app-bag-filters">
+    <mat-form-field appearance="outline" class="app-bag-filters__field">
+      <mat-label>Customer</mat-label>
+      <mat-select [formControl]="userControl">
+        <mat-option value="">All customers</mat-option>
+        @for (user of uniqueUsers(); track user.userAuthenticationId) {
+          <mat-option [value]="user.userAuthenticationId">{{ user.username }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="app-bag-filters__field">
+      <mat-label>Status</mat-label>
+      <mat-select [formControl]="statusControl">
+        <mat-option value="ALL">All</mat-option>
+        <mat-option value="OPEN">Open</mat-option>
+        <mat-option value="CLOSED">Closed</mat-option>
+        <mat-option value="CANCELLED">Cancelled</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading purchase bags…"></app-loading-spinner>
+  } @else if (bags().length === 0) {
+    <app-empty-state icon="shopping_bag" title="No purchase bags found"></app-empty-state>
+  } @else {
+    <div class="app-table-scroll">
+      <table mat-table [dataSource]="bags()">
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let bag">{{ bag.createdAt | date: 'medium' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="username">
+          <th mat-header-cell *matHeaderCellDef>Customer</th>
+          <td mat-cell *matCellDef="let bag">{{ bag.username }}</td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let bag"><app-bag-status-chip [status]="bag.status"></app-bag-status-chip></td>
+        </ng-container>
+        <ng-container matColumnDef="items">
+          <th mat-header-cell *matHeaderCellDef>Items</th>
+          <td mat-cell *matCellDef="let bag">{{ bag.items.length }}</td>
+        </ng-container>
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef>Total</th>
+          <td mat-cell *matCellDef="let bag">{{ bag.totalPrice | currency }}</td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef><span class="app-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let bag">
+            <a mat-icon-button [routerLink]="['/admin/purchase-bags', bag.id]" [attr.aria-label]="'View bag for ' + bag.username">
+              <mat-icon aria-hidden="true">visibility</mat-icon>
+            </a>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalElements()"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex()"
+      [hidePageSize]="true"
+      (page)="onPage($event)"
+      aria-label="Select page of purchase bags"
+    >
+    </mat-paginator>
+  }
+</div>

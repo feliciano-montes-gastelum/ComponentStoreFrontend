@@ -1,0 +1,22 @@
+.app-hero {
+  background: linear-gradient(135deg, var(--mat-sys-primary-container), var(--mat-sys-surface));
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.app-hero__inner {
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+  max-width: 760px;
+}
+
+.app-hero h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1.25;
+  margin: 0 0 0.75rem;
+}
+
+.app-hero p {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+  font-size: 1.05rem;
+}

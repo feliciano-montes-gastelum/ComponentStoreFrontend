@@ -1,0 +1,26 @@
+<div class="app-page">
+  <app-page-header title="Admin dashboard" description="Manage inventory, component types, users and requests."></app-page-header>
+
+  <div class="app-dashboard-tiles">
+    @for (tile of tiles(); track tile.label) {
+      <a [routerLink]="tile.link" class="app-dashboard-tile">
+        <mat-icon aria-hidden="true">{{ tile.icon }}</mat-icon>
+        <div>
+          <p class="app-dashboard-tile__value">{{ tile.value ?? '—' }}</p>
+          <p class="app-dashboard-tile__label">{{ tile.label }}</p>
+        </div>
+      </a>
+    }
+  </div>
+
+  <h2>Manage</h2>
+  <div class="app-dashboard-links">
+    @for (link of links; track link.route) {
+      <a [routerLink]="link.route" class="app-dashboard-link">
+        <mat-icon aria-hidden="true">{{ link.icon }}</mat-icon>
+        <span>{{ link.label }}</span>
+        <mat-icon aria-hidden="true" class="app-dashboard-link__chevron">chevron_right</mat-icon>
+      </a>
+    }
+  </div>
+</div>

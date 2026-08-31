@@ -1,0 +1,138 @@
+<div class="app-page">
+  <app-page-header title="My bag" description="Components you've added, ready for in-person pickup.">
+    <a mat-stroked-button routerLink="/my-bag/history">
+      <mat-icon aria-hidden="true">history</mat-icon>
+      View past bags
+    </a>
+  </app-page-header>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading your bag…"></app-loading-spinner>
+  } @else if (loadError()) {
+    <app-empty-state icon="error_outline" title="Unable to load your bag" description="Please try again in a moment."></app-empty-state>
+  } @else if (bag(); as currentBag) {
+    @if (currentBag.items.length === 0) {
+      <app-empty-state icon="shopping_bag" title="Your bag is empty" description="Browse the catalog and add components you'd like to pick up.">
+        <a mat-flat-button routerLink="/" fragment="catalog">Browse the catalog</a>
+      </app-empty-state>
+    } @else {
+      <ul class="app-bag-items">
+        @for (item of currentBag.items; track item.id + ':' + item.quantity) {
+          <li class="app-bag-item">
+            <div class="app-bag-item__image">
+              <app-image-with-fallback [src]="imageUrls()[item.inventoryId]" [alt]="item.inventoryName"></app-image-with-fallback>
+            </div>
+            <div class="app-bag-item__info">
+              <a [routerLink]="['/components', item.inventoryId]" class="app-bag-item__name">{{ item.inventoryName }}</a>
+              @if (item.partNumber) {
+                <p class="app-bag-item__meta">Part #: {{ item.partNumber }}</p>
+              }
+              <p class="app-bag-item__meta">Available stock: {{ item.availableQuantity }}</p>
+              <p class="app-bag-item__meta">Unit price: {{ item.unitPrice | currency }}</p>
+            </div>
+            <div class="app-bag-item__quantity">
+              <app-quantity-input
+                [ngModel]="item.quantity"
+                (ngModelChange)="onQuantityChange(item, $event)"
+                [min]="1"
+                [max]="99"
+                [label]="'Quantity of ' + item.inventoryName"
+                [attr.aria-disabled]="busyItemId() === item.id"
+              ></app-quantity-input>
+            </div>
+            <div class="app-bag-item__subtotal">
+              <span class="app-bag-item__subtotal-label">Subtotal</span>
+              <span class="app-bag-item__subtotal-value">{{ item.subtotal | currency }}</span>
+            </div>
+            <button
+              mat-icon-button
+              type="button"
+              color="warn"
+              [disabled]="busyItemId() === item.id"
+              (click)="removeItem(item)"
+              [attr.aria-label]="'Remove ' + item.inventoryName + ' from bag'"
+            >
+              <mat-icon aria-hidden="true">delete</mat-icon>
+            </button>
+          </li>
+        }
+      </ul>
+
+      <div class="app-bag-total">
+        <span>Bag total</span>
+        <span class="app-bag-total__value">{{ currentBag.totalPrice | currency }}</span>
+      </div>
+    }
+
+    <section class="app-pickup" aria-labelledby="pickup-heading">
+      <h2 id="pickup-heading">Pickup date &amp; time</h2>
+      <p class="app-pickup__status">
+        Pickup status: <app-pickup-status-chip [status]="currentBag.pickupStatus"></app-pickup-status-chip>
+      </p>
+      @if (currentBag.requestedPickupAt) {
+        <p class="app-pickup__requested">
+          Requested for {{ currentBag.requestedPickupAt | date: 'medium' }}
+          @if (currentBag.confirmedPickupAt) {
+            — confirmed for {{ currentBag.confirmedPickupAt | date: 'medium' }}
+          }
+        </p>
+      }
+      @if (currentBag.pickupNotes) {
+        <p class="app-pickup__notes">Notes: "{{ currentBag.pickupNotes }}"</p>
+      }
+
+      <form [formGroup]="pickupForm" (ngSubmit)="requestPickup()" novalidate>
+        <div class="app-pickup__datetime">
+          <mat-form-field appearance="outline">
+            <mat-label>Pickup date</mat-label>
+            <input matInput [matDatepicker]="datepicker" [min]="minPickupDate" formControlName="pickupDate" required />
+            <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
+            <mat-datepicker #datepicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Pickup time</mat-label>
+            <mat-select formControlName="pickupTime" required [disabled]="availableSlots().length === 0">
+              @for (slot of availableSlots(); track slot.value) {
+                <mat-option [value]="slot.value">{{ slot.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (checkingAvailability()) {
+          <p class="app-pickup__timezone">Checking availability…</p>
+        } @else if (availabilityCheckFailed()) {
+          <p class="app-pickup__error" role="alert">Unable to check pickup availability for that date. Please try again.</p>
+        } @else if (dateAvailability(); as availability) {
+          @if (availability.available) {
+            <p class="app-pickup__timezone">
+              Times shown are in {{ availability.timezone }}, based on {{ describeAppliedScope(availability.appliedScope) }}.
+            </p>
+          } @else {
+            <p class="app-pickup__error" role="alert">
+              This date is closed for pickup ({{ describeAppliedScope(availability.appliedScope) }}) — please choose another date.
+            </p>
+          }
+        }
+
+        @if (describePickupError(); as pickupError) {
+          <p class="app-pickup__error" role="alert">{{ pickupError }}</p>
+        }
+
+        <mat-form-field appearance="outline" class="app-pickup__notes-field">
+          <mat-label>Notes for pickup (optional)</mat-label>
+          <textarea matInput formControlName="pickupNotes" rows="2" maxlength="500"></textarea>
+        </mat-form-field>
+
+        @if (pickupBlockedByEmptyBag()) {
+          <p class="app-pickup__hint">Add at least one item to your bag before requesting a pickup time.</p>
+        }
+
+        <button mat-flat-button type="submit" [disabled]="!canSubmitPickup() || requestingPickup()">
+          {{ requestingPickup() ? 'Submitting…' : currentBag.pickupStatus === 'NOT_REQUESTED' ? 'Request pickup' : 'Update pickup request' }}
+        </button>
+      </form>
+    </section>
+  }
+</div>

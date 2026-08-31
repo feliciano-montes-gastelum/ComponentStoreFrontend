@@ -1,0 +1,18 @@
+<div class="app-page app-container-narrow">
+  @if (loading()) {
+    <app-loading-spinner label="Looking up this customer's bag…"></app-loading-spinner>
+  } @else if (noOpenBag()) {
+    <app-empty-state
+      icon="shopping_bag"
+      [title]="(username() ?? 'This customer') + ' has no open bag right now'"
+      description="They haven't added anything to a bag yet, or their last bag was already closed."
+    >
+      <a mat-flat-button [routerLink]="['/admin/purchase-bags']" [queryParams]="{ userAuthenticationId: userAuthenticationId() }">
+        <mat-icon aria-hidden="true">history</mat-icon>
+        View their bag history
+      </a>
+    </app-empty-state>
+  } @else if (errored()) {
+    <app-empty-state icon="error_outline" title="Unable to look up this customer's bag" description="Please try again in a moment."></app-empty-state>
+  }
+</div>

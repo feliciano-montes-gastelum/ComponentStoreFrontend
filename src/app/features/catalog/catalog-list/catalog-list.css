@@ -1,0 +1,22 @@
+.app-catalog-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.app-catalog-filters__search {
+  flex: 2 1 260px;
+}
+
+.app-catalog-filters__type {
+  flex: 1 1 200px;
+}
+
+.app-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}

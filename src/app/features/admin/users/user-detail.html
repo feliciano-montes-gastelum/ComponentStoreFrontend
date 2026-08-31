@@ -1,0 +1,94 @@
+<div class="app-page app-container-narrow">
+  <a routerLink="/admin/users" class="app-back-link">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Back to users
+  </a>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading user…"></app-loading-spinner>
+  } @else if (notFound() || !detail()) {
+    <app-empty-state icon="person_off" title="User not found" description="No account matches this ID."></app-empty-state>
+  } @else if (detail(); as user) {
+    <app-page-header [title]="user.username">
+      @if (user.principalContact) {
+        <span class="app-user-detail__principal-badge">
+          <mat-icon aria-hidden="true">star</mat-icon>
+          Principal contact
+        </span>
+      }
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="!canBecomePrincipalContact() || settingPrincipalContact()"
+        [matTooltip]="principalContactBlockedReason()"
+        (click)="setPrincipalContact()"
+      >
+        Set as principal contact
+      </button>
+      <button mat-flat-button type="button" (click)="changeRole()">Change role</button>
+    </app-page-header>
+
+    <dl class="app-user-detail__list">
+      <div>
+        <dt>Account ID</dt>
+        <dd>{{ id() }}</dd>
+      </div>
+      <div>
+        <dt>Email</dt>
+        <dd>{{ user.email }}</dd>
+      </div>
+      <div>
+        <dt>Role</dt>
+        <dd>
+          <mat-chip-set>
+            @for (role of user.roles; track role) {
+              <mat-chip>{{ role === 'ROLE_ADMINISTRATOR' ? 'Administrator' : 'Guest' }}</mat-chip>
+            }
+          </mat-chip-set>
+        </dd>
+      </div>
+      <div>
+        <dt>Account active</dt>
+        <dd>{{ user.active ? 'Yes' : 'No' }}</dd>
+      </div>
+      <div>
+        <dt>Last sign-in</dt>
+        <dd>{{ user.lastLoginAt ? (user.lastLoginAt | date: 'medium') : 'Never' }}</dd>
+      </div>
+    </dl>
+
+    <div class="app-user-detail__personal">
+      <h2>Personal information</h2>
+      <dl class="app-user-detail__list">
+        <div>
+          <dt>Name</dt>
+          <dd>{{ user.firstName }} {{ user.middleName }} {{ user.lastName }} {{ user.secondLastName }}</dd>
+        </div>
+        <div>
+          <dt>Contact number</dt>
+          <dd>{{ user.contactNumber || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Address</dt>
+          <dd>
+            @if (user.addressLine1 || user.city || user.country) {
+              @if (user.addressLine1) {
+                {{ user.addressLine1 }}<br />
+              }
+              @if (user.addressLine2) {
+                {{ user.addressLine2 }}<br />
+              }
+              @if (user.city || user.stateProvince || user.postalCode) {
+                {{ user.city }}{{ user.city && user.stateProvince ? ', ' : '' }}{{ user.stateProvince }}
+                {{ user.postalCode }}<br />
+              }
+              {{ user.country }}
+            } @else {
+              —
+            }
+          </dd>
+        </div>
+      </dl>
+    </div>
+  }
+</div>

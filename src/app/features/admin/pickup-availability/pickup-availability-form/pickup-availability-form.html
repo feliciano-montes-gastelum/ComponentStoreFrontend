@@ -1,0 +1,135 @@
+<h2 mat-dialog-title>{{ isEditMode ? 'Edit pickup availability rule' : 'New pickup availability rule' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate class="app-pickup-rule-form">
+  <mat-dialog-content>
+    @if (errorMessage()) {
+      <div class="app-form-error" role="alert">{{ errorMessage() }}</div>
+    }
+
+    <p class="app-pickup-rule-form__priority-note">
+      Priority when a customer picks a date: a <strong>DAY</strong> rule always wins, a <strong>WEEK</strong> rule
+      wins only when no DAY rule matches that date, and <strong>MONTH</strong> is the general fallback schedule.
+    </p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" required />
+      @if (form.get('name')?.invalid && form.get('name')?.touched) {
+        <mat-error>{{ describeError('name', 'Name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Scope</mat-label>
+      <mat-select formControlName="scope" required>
+        <mat-option value="DAY">DAY — one exact date, never repeats</mat-option>
+        <mat-option value="WEEK">WEEK — a day of the week</mat-option>
+        <mat-option value="MONTH">MONTH — a calendar month (general schedule)</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    @if (scopeValue() === 'DAY') {
+      <mat-form-field appearance="outline">
+        <mat-label>Specific date</mat-label>
+        <input matInput [matDatepicker]="specificDatePicker" formControlName="specificDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="specificDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #specificDatePicker></mat-datepicker>
+      </mat-form-field>
+    }
+
+    @if (scopeValue() === 'WEEK') {
+      <mat-form-field appearance="outline">
+        <mat-label>Day of week</mat-label>
+        <mat-select formControlName="dayOfWeek">
+          @for (option of dayOfWeekOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="app-pickup-rule-form__toggle">
+        <mat-slide-toggle formControlName="recurring">Repeats every week</mat-slide-toggle>
+      </div>
+
+      @if (!recurringValue()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Start of the applicable week</mat-label>
+          <input matInput [matDatepicker]="weekStartPicker" formControlName="weekStartDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="weekStartPicker"></mat-datepicker-toggle>
+          <mat-datepicker #weekStartPicker></mat-datepicker>
+        </mat-form-field>
+      }
+    }
+
+    @if (scopeValue() === 'MONTH') {
+      <mat-form-field appearance="outline">
+        <mat-label>Month</mat-label>
+        <mat-select formControlName="month">
+          @for (option of monthOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="app-pickup-rule-form__toggle">
+        <mat-slide-toggle formControlName="recurring">Repeats every year</mat-slide-toggle>
+      </div>
+
+      @if (!recurringValue()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Year</mat-label>
+          <input matInput type="number" formControlName="year" />
+        </mat-form-field>
+      }
+    }
+
+    @if (scopeValue() === 'DAY') {
+      <p class="app-pickup-rule-form__hint">DAY rules always apply once, to that one date — recurrence isn't offered.</p>
+    }
+
+    <div class="app-pickup-rule-form__toggle">
+      <mat-slide-toggle formControlName="available">Available for pickup during this period</mat-slide-toggle>
+    </div>
+
+    @if (availableValue()) {
+      <div class="app-form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Start time</mat-label>
+          <input matInput [matTimepicker]="startPicker" formControlName="startTime" />
+          <mat-timepicker-toggle matIconSuffix [for]="startPicker"></mat-timepicker-toggle>
+          <mat-timepicker #startPicker interval="15m"></mat-timepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>End time</mat-label>
+          <input matInput [matTimepicker]="endPicker" formControlName="endTime" />
+          <mat-timepicker-toggle matIconSuffix [for]="endPicker"></mat-timepicker-toggle>
+          <mat-timepicker #endPicker interval="15m"></mat-timepicker>
+        </mat-form-field>
+      </div>
+    } @else {
+      <p class="app-pickup-rule-form__hint">
+        This closes pickup for the whole matching period — no time fields needed. It overrides any available rule
+        at the same scope for that date.
+      </p>
+    }
+
+    <div class="app-pickup-rule-form__toggle">
+      <mat-slide-toggle formControlName="active">Active</mat-slide-toggle>
+    </div>
+
+    @if (describeFormError(); as formError) {
+      <p class="app-pickup-rule-form__error" role="alert">{{ formError }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [mat-dialog-close]="null">Cancel</button>
+    <button mat-flat-button type="submit" [disabled]="submitting()">
+      @if (submitting()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        {{ isEditMode ? 'Save changes' : 'Create rule' }}
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

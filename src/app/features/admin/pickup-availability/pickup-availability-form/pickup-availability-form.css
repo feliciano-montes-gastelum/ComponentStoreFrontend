@@ -1,0 +1,54 @@
+.app-pickup-rule-form {
+  display: flex;
+  flex-direction: column;
+  min-width: min(480px, 85vw);
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.app-pickup-rule-form__priority-note {
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 0.75rem;
+}
+
+.app-pickup-rule-form__toggle {
+  margin: 0.5rem 0 1rem;
+}
+
+.app-pickup-rule-form__hint {
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin: -0.25rem 0 1rem;
+}
+
+.app-pickup-rule-form__error {
+  background: var(--app-stock-out-bg);
+  color: var(--app-stock-out-fg);
+  border-radius: var(--app-radius-sm);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+.app-form-error {
+  background: var(--app-stock-out-bg);
+  color: var(--app-stock-out-fg);
+  border-radius: var(--app-radius-sm);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.app-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1rem;
+}
+
+@media (max-width: 480px) {
+  .app-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

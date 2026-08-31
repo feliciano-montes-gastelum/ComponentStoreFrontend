@@ -1,0 +1,108 @@
+<div class="app-page">
+  <app-page-header title="Inventory" description="Create, edit and manage electronic components.">
+    <a mat-flat-button routerLink="/admin/inventory/new">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      New component
+    </a>
+  </app-page-header>
+
+  <div class="app-catalog-filters">
+    <mat-form-field appearance="outline" class="app-catalog-filters__search">
+      <mat-label>Search</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Name, part number or manufacturer" />
+      <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="app-catalog-filters__type">
+      <mat-label>Component type</mat-label>
+      <mat-select [formControl]="componentTypeControl">
+        <mat-option value="">All types</mat-option>
+        @for (type of componentTypes(); track type.id) {
+          <mat-option [value]="type.id">{{ type.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="app-catalog-filters__type">
+      <mat-label>Status</mat-label>
+      <mat-select [formControl]="statusControl">
+        <mat-option value="all">All</mat-option>
+        <mat-option value="active">Active</mat-option>
+        <mat-option value="inactive">Inactive</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner label="Loading inventory…"></app-loading-spinner>
+  } @else if (items().length === 0) {
+    <app-empty-state icon="inventory_2" title="No components found" description="Try different filters, or add a new component.">
+      <a mat-flat-button routerLink="/admin/inventory/new">New component</a>
+    </app-empty-state>
+  } @else {
+    <div class="app-table-scroll">
+      <table mat-table [dataSource]="items()">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Component</th>
+          <td mat-cell *matCellDef="let item">
+            <a [routerLink]="['/admin/inventory', item.id, 'edit']" class="app-inventory-table__name">{{ item.name }}</a>
+            @if (item.partNumber) {
+              <span class="app-inventory-table__subtext">{{ item.partNumber }}</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let item">{{ item.componentTypeName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef>Qty</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.quantity }}
+            <app-stock-badge [quantity]="item.quantity"></app-stock-badge>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef>Price</th>
+          <td mat-cell *matCellDef="let item">{{ item.unitPrice | currency }}</td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Active</th>
+          <td mat-cell *matCellDef="let item">
+            <mat-slide-toggle
+              [checked]="item.active"
+              [disabled]="togglingId() === item.id"
+              (change)="toggleActive(item)"
+              [attr.aria-label]="(item.active ? 'Deactivate ' : 'Activate ') + item.name"
+            ></mat-slide-toggle>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>
+            <span class="app-visually-hidden">Actions</span>
+          </th>
+          <td mat-cell *matCellDef="let item">
+            <a mat-icon-button [routerLink]="['/admin/inventory', item.id, 'edit']" matTooltip="Edit" [attr.aria-label]="'Edit ' + item.name">
+              <mat-icon aria-hidden="true">edit</mat-icon>
+            </a>
+            <a mat-icon-button [routerLink]="['/admin/inventory', item.id, 'images']" matTooltip="Manage images" [attr.aria-label]="'Manage images for ' + item.name">
+              <mat-icon aria-hidden="true">photo_library</mat-icon>
+            </a>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalElements()"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex()"
+      [hidePageSize]="true"
+      (page)="onPage($event)"
+      aria-label="Select page of inventory"
+    >
+    </mat-paginator>
+  }
+</div>

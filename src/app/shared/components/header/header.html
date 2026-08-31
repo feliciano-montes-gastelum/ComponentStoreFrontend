@@ -1,0 +1,111 @@
+<a class="app-skip-link" href="#app-main-content">Skip to main content</a>
+<mat-toolbar color="primary" class="app-header">
+  <a routerLink="/" class="app-header__brand" aria-label="ComponentStore home">
+    <mat-icon aria-hidden="true">memory</mat-icon>
+    <span>ComponentStore</span>
+  </a>
+
+  <nav class="app-header__nav app-header__nav--desktop" aria-label="Primary">
+    <a mat-button routerLink="/" routerLinkActive="app-header__link--active" [routerLinkActiveOptions]="{ exact: true }">
+      Home
+    </a>
+
+    @if (auth.isAuthenticated()) {
+      <a mat-button routerLink="/my-requests" routerLinkActive="app-header__link--active">My Requests</a>
+      <a mat-button routerLink="/my-history" routerLinkActive="app-header__link--active">My History</a>
+    }
+
+    @if (auth.isAdministrator()) {
+      <button mat-button [matMenuTriggerFor]="adminMenu">
+        Admin
+        <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>
+      </button>
+      <mat-menu #adminMenu="matMenu">
+        <a mat-menu-item routerLink="/admin">Dashboard</a>
+        <a mat-menu-item routerLink="/admin/inventory">Inventory</a>
+        <a mat-menu-item routerLink="/admin/component-types">Component Types</a>
+        <a mat-menu-item routerLink="/admin/users">Users</a>
+        <a mat-menu-item routerLink="/admin/purchase-bags">Purchase Bags</a>
+        <a mat-menu-item routerLink="/admin/pickup-availability">Pickup Availability</a>
+        <a mat-menu-item routerLink="/admin/requests">Component Requests</a>
+        <a mat-menu-item routerLink="/admin/inventory-history">Inventory History</a>
+      </mat-menu>
+    }
+  </nav>
+
+  <span class="app-header__spacer"></span>
+
+  <div class="app-header__actions app-header__actions--desktop">
+    @if (auth.isAuthenticated()) {
+      <a
+        mat-icon-button
+        routerLink="/my-bag"
+        routerLinkActive="app-header__link--active"
+        [attr.aria-label]="'My bag, ' + bag.itemCount() + ' item' + (bag.itemCount() === 1 ? '' : 's')"
+      >
+        <mat-icon aria-hidden="true" [matBadge]="bag.itemCount() > 0 ? bag.itemCount() : null" matBadgeSize="small" matBadgeColor="accent">
+          shopping_bag
+        </mat-icon>
+      </a>
+      <button mat-button [matMenuTriggerFor]="accountMenu" aria-label="Account menu">
+        <mat-icon aria-hidden="true">account_circle</mat-icon>
+        {{ auth.username() }}
+      </button>
+      <mat-menu #accountMenu="matMenu">
+        <a mat-menu-item routerLink="/profile">
+          <mat-icon aria-hidden="true">person</mat-icon>
+          <span>Profile</span>
+        </a>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon aria-hidden="true">logout</mat-icon>
+          <span>Log out</span>
+        </button>
+      </mat-menu>
+    } @else {
+      <a mat-button routerLink="/login">Sign in</a>
+      <a mat-flat-button routerLink="/register">Register</a>
+    }
+  </div>
+
+  <button
+    mat-icon-button
+    class="app-header__menu-toggle"
+    [matMenuTriggerFor]="mobileMenu"
+    aria-label="Open navigation menu"
+  >
+    <mat-icon aria-hidden="true">menu</mat-icon>
+  </button>
+  <mat-menu #mobileMenu="matMenu">
+    <a mat-menu-item routerLink="/">Home</a>
+    @if (auth.isAuthenticated()) {
+      <a mat-menu-item routerLink="/my-bag">
+        <mat-icon aria-hidden="true" [matBadge]="bag.itemCount() > 0 ? bag.itemCount() : null" matBadgeSize="small" matBadgeColor="accent">
+          shopping_bag
+        </mat-icon>
+        <span>My Bag</span>
+      </a>
+      <a mat-menu-item routerLink="/my-requests">My Requests</a>
+      <a mat-menu-item routerLink="/my-history">My History</a>
+      <a mat-menu-item routerLink="/profile">Profile</a>
+    }
+    @if (auth.isAdministrator()) {
+      <mat-divider></mat-divider>
+      <a mat-menu-item routerLink="/admin">Admin dashboard</a>
+      <a mat-menu-item routerLink="/admin/inventory">Inventory</a>
+      <a mat-menu-item routerLink="/admin/component-types">Component Types</a>
+      <a mat-menu-item routerLink="/admin/users">Users</a>
+      <a mat-menu-item routerLink="/admin/purchase-bags">Purchase Bags</a>
+      <a mat-menu-item routerLink="/admin/pickup-availability">Pickup Availability</a>
+      <a mat-menu-item routerLink="/admin/requests">Component Requests</a>
+      <a mat-menu-item routerLink="/admin/inventory-history">Inventory History</a>
+    }
+    <mat-divider></mat-divider>
+    @if (auth.isAuthenticated()) {
+      <button mat-menu-item (click)="logout()">Log out</button>
+    } @else {
+      <a mat-menu-item routerLink="/login">Sign in</a>
+      <a mat-menu-item routerLink="/register">Register</a>
+    }
+  </mat-menu>
+</mat-toolbar>
