@@ -5,15 +5,18 @@ applications:
       variables:
         NODE_ENV: production
         NPM_CACHE_LOCATION: ~/.npm
+        NODE_VERSION: 22.22.3
     frontend:
       phases:
         preBuild:
           commands:
-            - npm ci
-            - npm run build
+            - npm ci --legacy-peer-deps
+            - echo "Installed dependencies successfully"
         build:
           commands:
-            - echo "Build complete"
+            - echo "Starting build process"
+            - npm run build
+            - echo "Build completed successfully"
       artifacts:
         baseDirectory: dist
         files:
