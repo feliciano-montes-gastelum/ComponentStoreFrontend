@@ -10,13 +10,12 @@ applications:
       phases:
         preBuild:
           commands:
-            - npm install --legacy-peer-deps
-            - echo "Installed dependencies successfully"
-        build:
-          commands:
-            - echo "Starting build process"
+            - npm install --legacy-peer-deps --force
             - npm run build
             - echo "Build completed successfully"
+        build:
+          commands:
+            - echo "Build artifacts ready for deployment"
       artifacts:
         baseDirectory: dist
         files:
