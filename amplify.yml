@@ -8,6 +8,9 @@ applications:
       phases:
         preBuild:
           commands:
+            - nvm install $NODE_VERSION
+            - nvm use $NODE_VERSION
+            - node -v
             - rm -rf node_modules package-lock.json
             - npm install --legacy-peer-deps --include=dev
             - npm run build
