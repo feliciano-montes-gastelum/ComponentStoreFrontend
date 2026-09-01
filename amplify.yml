@@ -4,13 +4,13 @@ applications:
     env:
       variables:
         NODE_ENV: production
-        NPM_CACHE_LOCATION: ~/.npm
         NODE_VERSION: 22.22.3
     frontend:
       phases:
         preBuild:
           commands:
-            - npm install --legacy-peer-deps --force
+            - rm -rf node_modules package-lock.json
+            - npm install --legacy-peer-deps --save-dev
             - npm run build
             - echo "Build completed successfully"
         build:
@@ -21,13 +21,7 @@ applications:
         files:
           - '**/*'
       cache:
-        paths:
-          - node_modules/**/*
-      files:
-        - '**/*.html'
-        - '**/*.css'
-        - '**/*.js'
-        - '**/*.json'
+        paths: []
     backend:
       phases:
         build:
