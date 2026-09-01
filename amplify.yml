@@ -10,7 +10,7 @@ applications:
       phases:
         preBuild:
           commands:
-            - npm ci --legacy-peer-deps
+            - npm install --legacy-peer-deps
             - echo "Installed dependencies successfully"
         build:
           commands:
