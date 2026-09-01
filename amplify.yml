@@ -3,7 +3,7 @@ applications:
   - appRoot: .
     env:
       variables:
-        NODE_VERSION: 24.15.0
+        NODE_VERSION: "24"
     frontend:
       phases:
         preBuild:
