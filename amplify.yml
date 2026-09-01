@@ -19,7 +19,7 @@ applications:
           commands:
             - echo "Build artifacts ready for deployment"
       artifacts:
-        baseDirectory: dist
+        baseDirectory: dist/ComponentStoreFrontend/browser
         files:
           - '**/*'
       cache:
