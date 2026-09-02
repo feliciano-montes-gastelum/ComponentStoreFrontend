@@ -8,7 +8,11 @@ import { NotificationService } from '../error-handling/notification.service';
 import { ApiError } from '../models';
 import { environment } from '../../../environments/environment';
 
-const AUTH_ENDPOINTS = ['/auth/login', '/auth/register'];
+// /auth/password-reset covers all three steps (request/verify/confirm): a 401 there means a bad
+// code or an expired/spent reset token, never an expired session — it must never force-logout an
+// unrelated session that happens to still be active in this tab (e.g. a second tab open to
+// /forgot-password while signed in elsewhere).
+const AUTH_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/password-reset'];
 
 function isAuthEndpoint(url: string): boolean {
   return AUTH_ENDPOINTS.some((path) => url.includes(path));

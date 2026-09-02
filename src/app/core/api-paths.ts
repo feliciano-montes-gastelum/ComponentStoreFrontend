@@ -8,6 +8,9 @@ export const ApiPaths = {
     login: `${base}/auth/login`,
     register: `${base}/auth/register`,
     me: `${base}/auth/me`,
+    passwordResetRequest: `${base}/auth/password-reset/request`,
+    passwordResetVerify: `${base}/auth/password-reset/verify`,
+    passwordResetConfirm: `${base}/auth/password-reset/confirm`,
   },
   componentTypes: {
     collection: `${base}/component-types`,

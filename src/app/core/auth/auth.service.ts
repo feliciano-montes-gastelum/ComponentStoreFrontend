@@ -8,6 +8,11 @@ import {
   AuthenticationResponse,
   CurrentUserResponse,
   LoginRequest,
+  MessageResponse,
+  PasswordResetCodeRequest,
+  PasswordResetConfirmRequest,
+  PasswordResetRequest,
+  PasswordResetTokenResponse,
   ROLE_ADMINISTRATOR,
   ROLE_GUEST,
   UserInformationUpdateRequest,
@@ -84,6 +89,33 @@ export class AuthService {
   /** Updates the logged-in user's own personal information. Email and username aren't editable here. */
   updateCurrentUser(request: UserInformationUpdateRequest): Observable<CurrentUserResponse> {
     return this.http.put<CurrentUserResponse>(ApiPaths.auth.me, request);
+  }
+
+  /**
+   * Step 1 of "forgot password". The backend deliberately never reveals whether the email
+   * matches an account — it always resolves with the same generic message (and silently no-ops,
+   * still returning that same message, while a prior code for this email is still within its
+   * cooldown window). Never touches the current session.
+   */
+  requestPasswordReset(email: string): Observable<MessageResponse> {
+    const request: PasswordResetRequest = { email };
+    return this.http.post<MessageResponse>(ApiPaths.auth.passwordResetRequest, request);
+  }
+
+  /**
+   * Step 2: exchanges the 6-digit emailed code for a short-lived, single-purpose reset token.
+   * Fails with 401 if the code is wrong, expired, or has already been used/re-verified too many
+   * times (the backend tracks attempts per code).
+   */
+  verifyPasswordResetCode(email: string, code: string): Observable<PasswordResetTokenResponse> {
+    const request: PasswordResetCodeRequest = { email, code };
+    return this.http.post<PasswordResetTokenResponse>(ApiPaths.auth.passwordResetVerify, request);
+  }
+
+  /** Step 3: spends the reset token from verifyPasswordResetCode() to set a new password. Fails with 401 if the token is invalid, expired, or already used. */
+  resetPassword(token: string, newPassword: string): Observable<MessageResponse> {
+    const request: PasswordResetConfirmRequest = { token, newPassword };
+    return this.http.post<MessageResponse>(ApiPaths.auth.passwordResetConfirm, request);
   }
 
   /**

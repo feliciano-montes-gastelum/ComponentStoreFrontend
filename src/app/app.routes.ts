@@ -7,7 +7,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./features/home/home').then((m) => m.Home),
-    title: 'ComponentStore — Home',
+    title: 'ComponentStore — Electronic Components, In Stock & Ready for Pickup',
   },
   {
     path: 'components/:id',
@@ -23,6 +23,11 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () => import('./features/auth/register/register').then((m) => m.Register),
     title: 'Register — ComponentStore',
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./features/auth/forgot-password/forgot-password').then((m) => m.ForgotPassword),
+    title: 'Reset password — ComponentStore',
   },
 
   // Authenticated guest (and administrator) routes.

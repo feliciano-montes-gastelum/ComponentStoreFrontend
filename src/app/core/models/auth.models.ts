@@ -25,6 +25,36 @@ export interface UserRegistrationRequest {
   country?: string;
 }
 
+/** Generic { message } envelope — used for endpoints that intentionally reveal nothing else (e.g. password-reset request/confirm). */
+export interface MessageResponse {
+  message: string;
+}
+
+/** POST /api/auth/password-reset/request. The response is always the same generic MessageResponse, whether or not the email matches an account. */
+export interface PasswordResetRequest {
+  email: string;
+}
+
+/** POST /api/auth/password-reset/verify — code is the 6-digit code emailed to the user. */
+export interface PasswordResetCodeRequest {
+  email: string;
+  code: string;
+}
+
+/** Returned by POST /api/auth/password-reset/verify once the code checks out — a short-lived, single-purpose token (not a login session) that authorizes exactly one POST /api/auth/password-reset/confirm. */
+export interface PasswordResetTokenResponse {
+  resetToken: string;
+  tokenType: string;
+  /** ISO-8601 instant. */
+  expiresAt: string;
+}
+
+/** POST /api/auth/password-reset/confirm. */
+export interface PasswordResetConfirmRequest {
+  token: string;
+  newPassword: string;
+}
+
 /** Response shape shared by POST /api/auth/login and POST /api/auth/register. */
 export interface AuthenticationResponse {
   token: string;

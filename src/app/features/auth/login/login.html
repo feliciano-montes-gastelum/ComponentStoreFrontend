@@ -39,6 +39,8 @@
       }
     </mat-form-field>
 
+    <a routerLink="/forgot-password" class="app-auth-page__forgot-password">Forgot your password?</a>
+
     <button mat-flat-button type="submit" class="app-auth-page__submit" [disabled]="submitting()">
       @if (submitting()) {
         <mat-spinner diameter="20"></mat-spinner>

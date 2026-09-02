@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,27 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../core/models';
 import { applyServerFieldErrors, describeControlError } from '../../../shared/utils/form-errors.util';
-
-function passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
-  const password = group.get('password')?.value;
-  const confirmPassword = group.get('confirmPassword')?.value;
-  if (password && confirmPassword && password !== confirmPassword) {
-    return { passwordMismatch: true };
-  }
-  return null;
-}
-
-// Mirrors the backend's UserRegistrationRequest.password @Pattern(".*\\p{Punct}.*") — Java's
-// POSIX \p{Punct} class is exactly this fixed ASCII punctuation set, not full Unicode punctuation.
-const SPECIAL_CHARACTER_PATTERN = /[!"#$%&'()*+,\-./:;<=>?@[\]^_`{|}~]/;
-
-function passwordSpecialCharacterValidator(control: AbstractControl): ValidationErrors | null {
-  const value = control.value as string | null;
-  if (!value) {
-    return null;
-  }
-  return SPECIAL_CHARACTER_PATTERN.test(value) ? null : { missingSpecialCharacter: true };
-}
+import { passwordSpecialCharacterValidator, passwordsMatchValidator } from '../../../shared/utils/password-validators.util';
 
 @Component({
   selector: 'app-register',
@@ -80,7 +60,7 @@ export class Register {
       postalCode: ['', [Validators.maxLength(20)]],
       country: ['', [Validators.maxLength(100)]],
     },
-    { validators: passwordsMatchValidator }
+    { validators: passwordsMatchValidator() }
   );
 
   protected describeError(field: string, label: string): string | null {
